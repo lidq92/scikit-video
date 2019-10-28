@@ -1,15 +1,11 @@
-from ..utils import *
-from ..motion import blockMotion
 import numpy as np
-import scipy.ndimage
 import scipy.fftpack
-import scipy.stats
 import scipy.io
-import sys
-import math
+import scipy.ndimage
+import scipy.stats
 
-from os.path import dirname
-from os.path import join
+from ..utils import *
+
 
 def gauss_window_full(lw, sigma):
     sd = np.float32(sigma)
@@ -53,7 +49,7 @@ def viideo_score(videoData, blocksize=(18, 18), blockoverlap=(8, 8), filterlengt
 
     .. [#f2] A. Mittal, M. A. Saad and A. C. Bovik, "A 'Completely Blind' Video Integrity Oracle", submitted to IEEE Transactions in Image Processing, 2014.
     """
-    features = viideo_features(videoData, blocksize=(18, 18), blockoverlap=(8, 8), filterlength=7)
+    features = viideo_features(videoData, blocksize=blocksize, blockoverlap=blockoverlap, filterlength=filterlength)
 
     features = features.reshape(features.shape[0], -1, features.shape[3])
 
@@ -80,14 +76,14 @@ def viideo_score(videoData, blocksize=(18, 18), blockoverlap=(8, 8), filterlengt
         vec1 = np.abs(low_Fr1 - low_Fr2)
         vec2 = np.abs(high_Fr1- high_Fr2)
 
-        if f1_cum == []:
+        if len(f1_cum) == 0:
           f1_cum = vec1
           f2_cum = vec2
         else:
           f1_cum = np.vstack((f1_cum, vec1))
           f2_cum = np.vstack((f2_cum, vec2))
 
-      if f1_cum != []:
+      if len(f1_cum) > 0:
         A = np.zeros((f1_cum.shape[1]), dtype=np.float32)
         for i in range(f1_cum.shape[1]):
           if (np.sum(np.abs(f1_cum[:, i])) != 0) & (np.sum(np.abs(f2_cum[:, i])) != 0):
